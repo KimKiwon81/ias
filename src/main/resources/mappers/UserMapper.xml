@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korigin.tobe.ias.mapper.UserMapper">
+
+    <!-- 사용자 목록 조회 -->
+    <select id="selectUserList" parameterType="com.korigin.tobe.ias.dto.UserSearchDTO" resultType="com.korigin.tobe.ias.dto.UserDTO">
+        SELECT
+            T1.USR_SEQ, T1.USR_ID, T1.USR_NAME, T1.ROLE, T2.CODE_NAME AS ROLE_NM, T1.APPR_LVL, T1.USE_YN,
+            T1.DEPT_CD, T3.CODE_NAME AS DEPT_NM, T1.TOT_VAC, T1.REST_VAC, T1.FINAL_LOGIN_DATE,
+            T1.REG_USR_ID, T1.REG_DTM, T1.MODI_USR_ID, T1.MODI_DTM
+        FROM IAS_USER T1
+        LEFT JOIN IAS_CODE T2 ON T1.ROLE = T2.CODE_VALUE AND T2.GRP_CODE = 'ROLE_TYPE'
+        LEFT JOIN IAS_CODE T3 ON T1.DEPT_CD = T3.CODE_VALUE AND T3.GRP_CODE = 'DEPT'
+        WHERE 1=1
+        <if test="searchUserId != null and searchUserId != ''">
+            AND T1.USR_ID LIKE CONCAT('%', #{searchUserId}, '%')
+        </if>
+        <if test="searchUserName != null and searchUserName != ''">
+            AND T1.USR_NAME LIKE CONCAT('%', #{searchUserName}, '%')
+        </if>
+        <if test="searchDeptCd != null and searchDeptCd != ''">
+            AND T1.DEPT_CD = #{searchDeptCd}
+        </if>
+        <if test="searchRole != null and searchRole != ''">
+            AND T1.ROLE = #{searchRole}
+        </if>
+        <if test="searchUseYn != null and searchUseYn != ''">
+            AND T1.USE_YN = #{searchUseYn}
+        </if>
+        ORDER BY T1.REG_DTM DESC
+    </select>
+
+    <!-- 사용자 ID로 상세 조회 -->
+    <select id="selectUserById" parameterType="string" resultType="com.korigin.tobe.ias.dto.UserDTO">
+        SELECT
+            T1.USR_SEQ, T1.USR_ID, T1.PASSWD, T1.USR_NAME, T1.ROLE, T2.CODE_NAME AS ROLE_NM, T1.APPR_LVL, T1.USE_YN,
+            T1.DEPT_CD, T3.CODE_NAME AS DEPT_NM, T1.TOT_VAC, T1.REST_VAC, T1.FINAL_LOGIN_DATE,
+            T1.REG_USR_ID, T1.REG_DTM, T1.MODI_USR_ID, T1.MODI_DTM
+        FROM IAS_USER T1
+        LEFT JOIN IAS_CODE T2 ON T1.ROLE = T2.CODE_VALUE AND T2.GRP_CODE = 'ROLE_TYPE'
+        LEFT JOIN IAS_CODE T3 ON T1.DEPT_CD = T3.CODE_VALUE AND T3.GRP_CODE = 'DEPT'
+        WHERE T1.USR_ID = #{userId}
+    </select>
+
+    <!-- 신규 사용자 등록 -->
+    <insert id="insertUser" parameterType="com.korigin.tobe.ias.dto.UserDTO">
+        <selectKey keyProperty="usrSeq" resultType="long" order="BEFORE">
+            SELECT ias.GET_NEXT_IAS_SEQ('IAS_USER')
+        </selectKey>
+        INSERT INTO IAS_USER (
+            USR_SEQ, USR_ID, PASSWD, USR_NAME, `ROLE`, APPR_LVL, USE_YN, DEPT_CD, TOT_VAC, REST_VAC,
+            REG_USR_ID, REG_DTM, MODI_USR_ID, MODI_DTM
+        ) VALUES (
+            #{usrSeq}, #{userId}, #{password}, #{userName}, #{role}, #{apprLvl}, #{useYn}, #{deptCd}, #{totVac}, #{restVac},
+            #{regUsrId}, NOW(), #{modiUsrId}, NOW()
+        )
+    </insert>
+
+    <!-- 기존 사용자 정보 수정 -->
+    <update id="updateUser" parameterType="com.korigin.tobe.ias.dto.UserDTO">
+        UPDATE IAS_USER
+        SET
+            USR_NAME = #{userName},
+            <if test="password != null and password != ''">
+            PASSWD = #{password},
+            </if>
+            `ROLE` = #{role},
+            APPR_LVL = #{apprLvl},
+            USE_YN = #{useYn},
+            DEPT_CD = #{deptCd},
+            TOT_VAC = #{totVac},
+            REST_VAC = #{restVac},
+            MODI_USR_ID = #{modiUsrId},
+            MODI_DTM = NOW()
+        WHERE USR_ID = #{userId}
+    </update>
+
+    <!-- 사용자 삭제 -->
+    <delete id="deleteUser" parameterType="string">
+        DELETE FROM IAS_USER
+        WHERE USR_ID = #{userId}
+    </delete>
+    
+    <!-- 사용자 ID 중복 체크 -->
+    <select id="checkUserIdExists" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM IAS_USER WHERE USR_ID = #{userId}
+    </select>
+    
+    <!-- 비밀번호 업데이트 전용 (비밀번호 변경만 필요할 때) -->
+    <update id="updatePassword" parameterType="map">
+        UPDATE IAS_USER
+        SET
+            PASSWD = #{newPassword},
+            MODI_DTM = NOW()
+        WHERE USR_ID = #{userId}
+    </update>
+</mapper>

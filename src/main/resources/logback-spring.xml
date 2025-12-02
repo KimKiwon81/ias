@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 로그 출력 패턴 (시간, 로그 레벨, 스레드, 로거 이름, 메시지, 줄바꿈) -->
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) %green([%thread]) %cyan(%logger{50}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- [핵심] SQL 쿼리 로깅 설정 -->
+    <!-- jdbc.sqlonly: 실행된 SQL 문만을 로그로 출력 -->
+    <logger name="jdbc.sqlonly" level="DEBUG" />
+    
+    <!-- jdbc.sqltiming: 실행된 SQL문과 함께 쿼리 실행 시간 출력 -->
+    <logger name="jdbc.sqltiming" level="INFO" /> <!-- INFO로 설정하면 쿼리가 INFO 레벨로 보입니다. -->
+    
+    <!-- jdbc.resultsettable: SELECT 쿼리 결과를 테이블 형태로 출력 (매우 상세하며 양이 많을 수 있음) -->
+    <!-- 필요할 때만 DEBUG로 설정하고 평소에는 OFF 또는 INFO로 낮추는 것이 좋습니다. -->
+    <logger name="jdbc.resultsettable" level="DEBUG" />
+    
+    <!-- jdbc.audit: 호출되는 Statement 객체의 메소드 정보 출력 (거의 사용 안함) -->
+    <logger name="jdbc.audit" level="OFF" />
+    
+    <!-- jdbc.resultset: 결과셋의 모든 값을 로그로 출력 (매우 상세하며 양이 많을 수 있음) -->
+    <logger name="jdbc.resultset" level="OFF" />
+    
+    <!-- jdbc.connection: 커넥션 Open/Close 정보 (거의 사용 안함) -->
+    <logger name="jdbc.connection" level="OFF" />
+
+    <!-- 프로젝트의 패키지 경로에 대한 기본 로깅 레벨 설정 -->
+    <logger name="com.korigin.tobe.ias" level="DEBUG" />
+
+    <!-- Spring Framework 관련 로거 레벨 설정 (필요에 따라 조절) -->
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.mybatis" level="INFO"/>
+    <logger name="org.apache.ibatis" level="INFO"/>
+
+    <!-- 루트 로거 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+</configuration>
