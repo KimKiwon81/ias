@@ -93,60 +93,18 @@
                     <tr>
                         <th>순번</th>
                         <th>등록일시</th>
+                        <th>제목</th>
                         <th>등록자</th>
                         <th>부서</th>
                         <th>결재유형</th>
                         <th>결재상태</th>
                         <th>최종 결재 일시</th>
-                        <th>첨부</th>
                         <th>기능</th>
                     </tr>
                 </thead>
                 <tbody id="tblBody">
                     <%-- 초기 로딩 시 서버에서 받은 데이터를 JSTL로 먼저 채워 넣습니다 --%>
-                    <c:choose>
-                        <c:when test="${not empty approvalDocList}">
-                            <c:forEach var="doc" items="${approvalDocList}" varStatus="status">
-                                <tr>
-                                    <td>${status.count}</td>
-                                    <td><spring:eval expression="doc.regDt.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm:ss'))" /></td>
-                                    <td>${doc.reqUserNm}</td>
-                                    <td>${doc.reqDeptNm}</td>
-                                    <td>${doc.approvTyNm}</td>
-                                    <td>${doc.docStatNm}</td>
-                                    <td>
-                                        <c:choose>
-                                            <c:when test="${not empty doc.finalApprDt}">
-                                                <spring:eval expression="doc.finalApprDt.format(T(java.time.format.DateTimeFormatter).ofPattern('yyyy-MM-dd HH:mm:ss'))" />
-                                            </c:when>
-                                            <c:otherwise>-</c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td>
-                                        <c:if test="${not empty doc.atchFilePath}">
-                                            <a href="<c:url value="${doc.atchFilePath}"/>" target="_blank" class="btn btn-info btn-circle btn-sm">
-                                                <i class="fas fa-file"></i>
-                                            </a>
-                                        </c:if>
-                                        <c:if test="${empty doc.atchFilePath}">
-                                            -
-                                        </c:if>
-                                    </td>
-                                    <td>
-                                        <a href="#" class="btn btn-primary btn-sm">상세</a>
-                                        <c:if test="${doc.reqUserId eq userId}">
-                                            <a href="javascript:void(0);" class="btn btn-danger btn-sm" onclick="confirmDelete('${doc.approvDocId}');">삭제</a>
-                                        </c:if>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <tr>
-                                <td colspan="9" class="text-center no-data-row">등록된 결재 문서가 없습니다.</td>
-                            </tr>
-                        </c:otherwise>
-                    </c:choose>
+                    
                 </tbody>
             </table>
         </div>
@@ -181,6 +139,13 @@
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
                 $regDateFrom.datepicker('setDate', sevenDaysAgo);
+            }
+
+            if("${sessionScope.role}" == "MEMBER"){
+                $("#userName").val("${sessionScope.userName}").attr("readOnly",true);
+                $("#deptName").val("${sessionScope.deptName}").attr("readOnly",true);
+            }else if("${sessionScope.role}" == "LEADER"){
+                $("#deptName").val("${sessionScope.deptName}").attr("readOnly",true);
             }
 
             $('#searchButton').on('click', function() {
@@ -225,12 +190,12 @@
                         var row = '<tr>';
                         row += '<td>' + (index + 1) + '</td>'; // 순번
                         row += '<td>' + formatLocalDateTime(doc.regDt) + '</td>'; // 등록일시
+                        row += '<td>' + escapeHtml(doc.docTitle) + '</td>' ; //제목
                         row += '<td>' + escapeHtml(doc.reqUserNm) + '</td>'; // 등록자
                         row += '<td>' + escapeHtml(doc.reqDeptNm) + '</td>'; // 부서
                         row += '<td>' + escapeHtml(doc.approvTyNm) + '</td>'; // 결재유형
                         row += '<td>' + getBadgeHtml(doc.docStatNm, doc.docStatCd) + '</td>'; // 결재상태
                         row += '<td>' + (doc.finalApprDt ? formatLocalDateTime(doc.finalApprDt) : '-') + '</td>'; // 최종 결재 일시
-                        row += '<td>' + getAttachmentHtml(doc.atchFilePath) + '</td>'; // 첨부
                         row += '<td>';
                         row += '<a href="#" class="btn btn-primary btn-sm">상세</a> ';
                         // 현재 로그인한 사용자 ID와 문서 신청자 ID 비교
@@ -311,9 +276,10 @@
             function getAttachmentHtml(filePath) {
                 if (filePath) {
                     // "${pageContext.request.contextPath}"는 JSP 스크립트릿이 로드된 후에만 사용 가능
-                    var contextPath = "${pageContext.request.contextPath}";
-                    return '<a href="' + contextPath + filePath + '" target="_blank" class="btn btn-info btn-circle btn-sm">' +
-                            '<i class="fas fa-file"></i></a>';
+                    // var contextPath = "${pageContext.request.contextPath}";
+                     return '<a href="" target="_blank" class="btn btn-info btn-circle btn-sm" onclick="fnDownload("'+filePath+'")">' +
+                             '<i class="fas fa-file"></i></a>';
+                    
                 }
                 return '-';
             }
@@ -345,6 +311,10 @@
             window.confirmDelete = confirmDelete;
 
         });
+
+        function fnDownload(filePath){
+            alert(filePath);
+        }
 
     })();
 

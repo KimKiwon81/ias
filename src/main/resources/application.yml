@@ -18,7 +18,7 @@ spring:
         #driver-class-name: org.mariadb.jdbc.Driver
     servlet:
         multipart:
-            location: E:/ias/storage/tmp
+            location: E:/tobe/storage/ias/tmp
 
 mybatis:
     mapper-locations: classpath:mappers/**/**.xml
@@ -28,5 +28,5 @@ mybatis:
 
 app:
     upload:
-        root-path: E:/ias/storage
+        root-path: E:/tobe/storage/ias
         resource-handler: /upload/**

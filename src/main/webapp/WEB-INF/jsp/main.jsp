@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -71,6 +72,7 @@
             </li>
 
             <!-- Nav Item - Utilities Collapse Menu -->
+            <c:if test="${sessionScope.role eq 'ADMIN'}">
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
                     aria-expanded="true" aria-controls="collapseUtilities">
@@ -80,29 +82,10 @@
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="#" onclick="loadContent('userList')">사용자 관리</a>
-                        <a class="collapse-item" href="utilities-border.html">연차 현황</a>
                     </div>
                 </div>
             </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#systemPages"
-                    aria-expanded="true" aria-controls="systemPages">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>시스템 관리</span>
-                </a>
-                <div id="systemPages" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="buttons.html">코드관리</a>
-                    </div>
-                </div>
-            </li>
-
-           
-
+            </c:if>
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -239,6 +222,7 @@
                 console.error("Error loading content:", xhr.status + ": " + xhr.statusText);
                 alert("페이지를 불러오지 못했습니다: " + xhr.statusText);
             } else {
+                console.log("${sessionScope}");
                 console.log("Content loaded successfully.");
             }
         });

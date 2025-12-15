@@ -67,7 +67,9 @@ public class LoginController {
         String userId = (String) session.getAttribute("userId");
         String userName = (String) session.getAttribute("userName");
         String deptCd = (String) session.getAttribute("deptCd");
+        String deptName = (String) session.getAttribute("deptNm");
         String role = (String) session.getAttribute("role");
+        
 
         model.addAttribute("userId", userId);
         model.addAttribute("userName", userName);

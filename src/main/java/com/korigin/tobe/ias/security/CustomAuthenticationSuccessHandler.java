@@ -39,6 +39,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         session.setAttribute("userId", user.getUsrId());
         session.setAttribute("userName", user.getUsrName());
         session.setAttribute("deptCd", user.getDeptCd());
+        session.setAttribute("deptName", user.getDeptNm());
         session.setAttribute("role", user.getRole());
         
         // 원하는 페이지로 리다이렉트
