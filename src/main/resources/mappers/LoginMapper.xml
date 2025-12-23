@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.korigin.tobe.ias.mapper.LoginMapper">
+
+    <select id="getLoginUser" resultType="login">
+        
+        SELECT 
+            IU.USR_SEQ
+            , IU.USR_ID
+            , IU.PASSWD
+            , IU.USR_NAME
+            , IU.ROLE
+            , IU.APPR_LVL
+            , IU.USE_YN
+            , IU.DEPT_CD
+            , IC.CODE_NAME AS DEPT_NM
+            , IU.TOT_VAC
+            , IU.REST_VAC
+        FROM IAS_USER IU 
+            INNER JOIN IAS_CODE IC ON (IC.GRP_CODE = 'DEPT' AND IC.CODE_VALUE = IU.DEPT_CD)
+        WHERE
+            UPPER(IU.USR_ID) = UPPER(#{usrId})
+        
+    </select>
+
+</mapper>

@@ -1,82 +1,134 @@
 package com.korigin.tobe.ias.controller;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.korigin.tobe.ias.model.Login;
+import com.korigin.tobe.ias.service.LoginService;
+import com.korigin.tobe.ias.util.CryptUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @Slf4j
 public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
     
-    @GetMapping("/login")
-    public String login(@RequestParam(value = "error", required = false) String error, Model model){
+    @RequestMapping("/login")
+    public ModelAndView login(HttpServletRequest request, Model model) {
 
-        if(error != null){
-            model.addAttribute("loginError", "아이디 또는 비밀번호가 일치하지 않습니다.");
+        ModelAndView mnv = new ModelAndView();
+
+        mnv.setViewName("login");
+
+        return mnv;
+    }
+
+    @RequestMapping("/loginProc")
+    public ModelAndView loginProc(HttpServletRequest request, Model model, @ModelAttribute Login login) {
+
+        ModelAndView mnv = new ModelAndView();
+        mnv.setViewName("jsonView");
+
+        String rtnCd = "00";
+
+        Login loginUser = null;
+
+        try {
+
+            log.debug("LOGIN => EMP_ID : [{}]", login.getUsrId());
+
+            loginUser = loginService.getLoginUser(login);
+
+            if (loginUser == null) {
+                // 계정 정보 없음
+                rtnCd = "10";
+                mnv.addObject("RTN_CD", rtnCd);
+                return mnv;
+            }
+
+            String encPasswd = CryptUtil.encryptString(login.getPasswd());
+
+            // 패스워드 불일치 관련 리턴
+            if (!encPasswd.equals(loginUser.getPasswd())) {
+
+                // 패스워드 불일치
+                rtnCd = "90";
+
+                mnv.addObject("RTN_CD", rtnCd);
+                return mnv;
+            }
+
+
+            HttpSession session = request.getSession(true);
+
+            session.setAttribute("SESS_LOGIN_INFO", loginUser);
+            session.setAttribute("SESS_USR_ID", loginUser.getUsrId());
+
+            session.setAttribute("SESS_USR_NAME", loginUser.getUsrName());
+            session.setAttribute("SESS_DEPT_CD", loginUser.getDeptCd());
+            session.setAttribute("SESS_DEPT_NM", loginUser.getDeptNm());
+
+            session.setAttribute("SESS_ROLE", loginUser.getRole());
+            session.setAttribute("SESS_APPRV_LVL", loginUser.getApprLvl());
+
+            session.setAttribute("SESS_TOT_VAC", loginUser.getTotVac());
+            session.setAttribute("SESS_REST_VAC", loginUser.getRestVac());
+
+            // session timeout 설정(현재 30분)
+            session.setMaxInactiveInterval(60 * 30);
+
+
+        } catch (Exception e) {
+
+            rtnCd = "99";
+            e.printStackTrace();
+        } finally {
+            try {
+
+                if (!"00".equals(rtnCd)) {
+                    request.getSession(true).invalidate();
+                }
+
+            } catch (Exception e) {
+
+            }
         }
 
-        return "login";
-    }
+        log.debug("rtnCd : {}", rtnCd);
+        mnv.addObject("RTN_CD", rtnCd);
 
-    @GetMapping("/changePasswordPop")
-    public String changePassword(@RequestParam(value = "userId", required = false) String userId, Model model){
-
-        if(userId != null && !userId.isEmpty()){
-            model.addAttribute("userId", userId);
-        }
-
-        return "changePassword";
+        return mnv;
 
     }
 
-    // 비밀번호 변경 처리 메서드 (선택적으로 추가)
-    @PostMapping("/changePassword")
-    public String processChangePassword(
-            @RequestParam("currentPassword") String currentPassword,
-            @RequestParam("newPassword") String newPassword,
-            @RequestParam("confirmPassword") String confirmPassword,
-            Authentication authentication,
-            RedirectAttributes redirectAttributes) {
-        
-        // 현재 로그인한 사용자 정보 가져오기
-        String userId = authentication.getName();
-        
-        // 여기에 비밀번호 변경 로직 구현
-        // 1. 현재 비밀번호 확인
-        // 2. 새 비밀번호와 확인 비밀번호 일치 여부 확인
-        // 3. 비밀번호 변경 처리
-        
-        // 성공 메시지 추가
-        redirectAttributes.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다.");
-        
-        // 메인 페이지 또는 설정 페이지로 리다이렉트
-        return "redirect:/approval";
+    @RequestMapping("/logoutProc")
+    public String logoutProc(HttpServletRequest request) {
+
+        HttpSession session = request.getSession();
+
+        session.invalidate();
+
+        return "redirect:login";
+
     }
 
-    @GetMapping("/main")
-    public String approval(HttpSession session, Model model){
-
-        String userId = (String) session.getAttribute("userId");
-        String userName = (String) session.getAttribute("userName");
-        String deptCd = (String) session.getAttribute("deptCd");
-        String deptName = (String) session.getAttribute("deptNm");
-        String role = (String) session.getAttribute("role");
-        
-
-        model.addAttribute("userId", userId);
-        model.addAttribute("userName", userName);
-        model.addAttribute("deptCd", deptCd);
-        model.addAttribute("role", role);
-
-        return "main";
+    @RequestMapping("/sessionExpried")
+    public ModelAndView doSessionExpried(HttpServletRequest request, HttpServletResponse response) {
+        log.debug("####################### LoginController sessionExpried");
+        ModelAndView mnv = new ModelAndView("jsonView");
+        mnv.addObject("SESSION", "EXPIRED");
+        return mnv;
     }
 
 }

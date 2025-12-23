@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>ToBe Pictures & Artwork IAS</title>
+        <title>Spring Boot Application with JSP</title>
     </head>
     <body>
         <script type="text/javascript">
