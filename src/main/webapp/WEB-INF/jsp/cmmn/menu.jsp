@@ -4,20 +4,14 @@
 		<div class="header-top">
 			<h1 class="logo">
 				<a href="/home" id="aLink">
-					<!-- 운영 반영시 변경-->
-					<!--변경 시작-->
-					<img src="/images/common/fsb.png" height="33px"/>
-					<!--변경 끝-->
+					<img src="/images/common/CI_w.gif" height="33px"/>
 				</a>
 			</h1>
 			<div class="user-area">
 				<span class="user"><%=session.getAttribute("SESS_USR_NAME") %> 님</span>
 				<button id="btnLogout" class="logout">로그아웃</button>
-				<input type="hidden" id="hdOrgCd" name="hdOrgCd" value='<%= session.getAttribute("SESS_ORG_CODE") %>' />
-				<input type="hidden" id="hdBrCd" name="hdBrCd" value='<%= session.getAttribute("SESS_BR_CD") %>' />
-				<input type="hidden" id="hdPrintYn" name="hdPrintYn" value='' />
-				<input type="hidden" id="hdProfile" name="hdProfile" value='<%= session.getAttribute("SESS_PROFILE") %>' />
-				<input type="hidden" id="hdEmpId" name="hdEmpId" value='<%= session.getAttribute("SESS_EMP_ID") %>' />
+				<input type="hidden" id="hdDeptCd" name="hdDeptCd" value='<%= session.getAttribute("SESS_DEPT_CD") %>' />
+				<input type="hidden" id="hdUsrId" name="hdUsrId" value='<%= session.getAttribute("SESS_USR_ID") %>' />
 			</div>
 		</div>
 		
@@ -45,8 +39,6 @@ $(document).ready(function(){
 		}
 		, success : function(data, textStatus){
 
-			$("#hdPrintYn").val(data.PRINT_AUTH_YN);
-			
 			if(data.SESSION == "EXPIRED"){
 				alert("세션이 만료 되었습니다.\n다시 로그인 해주시기 바랍니다.");
 				location = "/logoutProc";
